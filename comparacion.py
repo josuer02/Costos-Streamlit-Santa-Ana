@@ -307,15 +307,7 @@ if st.session_state.df is not None:
         df_ingresos['Porcentaje'] = df_ingresos['Crudo']
 
     df_ingresos['Ponderado'] = df_ingresos['Precio'] * df_ingresos['Porcentaje']
-
-    # Convert 'Ponderado' to percentage of total
     total_ponderado = df_ingresos['Ponderado'].sum()
-    df_ingresos['Ponderado'] = df_ingresos['Ponderado'] / total_ponderado
-
-    # Format 'Ponderado' as percentage
-    df_ingresos['Ponderado'] = df_ingresos['Ponderado'].apply(lambda x: f"{x:.2%}")
-
-    # Display the results
 
     contribuciones = 4.98  # Valor fijo de contribuciones
     total_ingresos = total_ponderado + contribuciones
