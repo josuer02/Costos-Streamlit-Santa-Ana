@@ -13,7 +13,7 @@ def load_data(file_path):
     return pd.read_excel(file_path, engine='openpyxl', sheet_name='COSTOS_QQ')
 
 # Default file path
-default_file = "/Users/josuer/Documents/DashBoard Fincas/Costos2022_2023 V8.xlsx"
+default_file = "/Users/josuer/Documents/DashBoard Fincas/Costos-Streamlit-Santa-Ana/Costos2022_2023 V8.xlsx"
 
 # Initialize session state variables
 if 'new_lat' not in st.session_state:
