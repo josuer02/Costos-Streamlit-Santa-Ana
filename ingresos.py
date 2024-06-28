@@ -27,47 +27,57 @@ if uploaded_file is not None:
     df = load_data(uploaded_file)
     st.success("Archivo cargado correctamente!")
 
-# Mientras que el df no es nulo.
+# While df is not None
 if df is not None:
-    # Mostrar el DataFrame cargado
-    st.write("DataFrame cargado:")
+    #### Filtro por GRUPO
+    st.header("Filtro por GRUPO")
     
-    #st.write(df)
-    #st.header("Análisis de Ingresos")
+    # Get unique values from GRUPO column
+    grupos = df['GRUPO'].unique().tolist()
+    
+    # Create a multiselect widget for GRUPO
+    selected_grupos = st.multiselect("Seleccione los GRUPOs a incluir:", grupos, default=grupos)
+    
+    # Filter the dataframe based on selected GRUPOs
+    df_filtered = df[df['GRUPO'].isin(selected_grupos)]
+    
+    # Show the number of farms included
+    st.write(f"Número de fincas incluidas: {len(df_filtered)}")
 
-    # Calcular ingresos totales
-    ingresos_totales = df['INGRESO '].sum()
+    #### Análisis de Ingresos
+    st.header("Análisis de Ingresos")
+
+    # Calculate total income
+    ingresos_totales = df_filtered['INGRESO '].sum()
     st.metric("Ingresos Totales", f"${ingresos_totales:,.2f}")
 
-    # Gráfico de ingresos por finca
-    fig_ingresos = px.bar(df, x='NOMFIN', y='INGRESO ', title='Ingresos por Finca')
+    # Income chart by farm
+    fig_ingresos = px.bar(df_filtered, x='NOMFIN', y='INGRESO ', title='Ingresos por Finca')
     st.plotly_chart(fig_ingresos)
 
     #### Análisis de Márgenes
-
     st.header("Análisis de Márgenes")
 
-    # Calcular margen por finca
-    df['Margen'] = df['INGRESO '] - df['TOTAL SIN INV']
-    df['Margen %'] = (df['Margen'] / df['INGRESO ']) * 100
+    # Calculate margin by farm
+    df_filtered['Margen'] = df_filtered['INGRESO '] - df_filtered['TOTAL SIN INV']
+    df_filtered['Margen %'] = (df_filtered['Margen'] / df_filtered['INGRESO ']) * 100
 
-    # Mostrar márgenes
-    fig_margenes = px.scatter(df, x='INGRESO ', y='Margen', 
+    # Show margins
+    fig_margenes = px.scatter(df_filtered, x='INGRESO ', y='Margen', 
                               size='AREA', color='REGION', 
                               hover_name='NOMFIN', 
                               title='Margen vs Ingresos por Finca')
     st.plotly_chart(fig_margenes)
 
-    # Top 5 fincas con mejor margen porcentual
-    top_margenes = df.nlargest(5, 'Margen %')
+    # Top 5 farms with best percentage margin
+    top_margenes = df_filtered.nlargest(5, 'Margen %')
     st.write("Top 5 Fincas con Mejor Margen Porcentual:")
     st.write(top_margenes[['NOMFIN', 'Margen %', 'INGRESO ', 'TOTAL SIN INV']])
 
     #### Análisis por Región
-
     st.header("Análisis por Región")
 
-    region_stats = df.groupby('REGION').agg({
+    region_stats = df_filtered.groupby('REGION').agg({
         'INGRESO ': 'sum',
         'TOTAL SIN INV': 'sum',
         'AREA': 'sum'
