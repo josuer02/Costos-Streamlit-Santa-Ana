@@ -274,10 +274,6 @@ if st.session_state.df is not None:
         'Crudo': [1.00, 0.00, 0.00, 0.00]
     })
 
-    percentage_columns = ['Local', 'Solo exp', 'Crudo']
-    for column in percentage_columns:
-        df_ingresos[column] = df_ingresos[column].apply(lambda x: f"{x:.2%}")
-    
     # Selector para el escenario
     escenario = st.selectbox("Seleccione el escenario:", ["Comercialización", "a 15$ el Crudo", "Ingreso Manual"])
 
