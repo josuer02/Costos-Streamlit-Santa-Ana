@@ -274,6 +274,10 @@ if st.session_state.df is not None:
         'Crudo': [1.00, 0.00, 0.00, 0.00]
     })
 
+    percentage_columns = ['Local', 'Solo exp', 'Crudo']
+    for column in percentage_columns:
+        df_ingresos[column] = df_ingresos[column].apply(lambda x: f"{x:.2%}")
+    
     # Selector para el escenario
     escenario = st.selectbox("Seleccione el escenario:", ["Comercialización", "a 15$ el Crudo", "Ingreso Manual"])
 
@@ -303,7 +307,15 @@ if st.session_state.df is not None:
         df_ingresos['Porcentaje'] = df_ingresos['Crudo']
 
     df_ingresos['Ponderado'] = df_ingresos['Precio'] * df_ingresos['Porcentaje']
+
+    # Convert 'Ponderado' to percentage of total
     total_ponderado = df_ingresos['Ponderado'].sum()
+    df_ingresos['Ponderado'] = df_ingresos['Ponderado'] / total_ponderado
+
+    # Format 'Ponderado' as percentage
+    df_ingresos['Ponderado'] = df_ingresos['Ponderado'].apply(lambda x: f"{x:.2%}")
+
+    # Display the results
 
     contribuciones = 4.98  # Valor fijo de contribuciones
     total_ingresos = total_ponderado + contribuciones
