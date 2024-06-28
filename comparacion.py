@@ -13,7 +13,7 @@ def load_data(file_path):
     return pd.read_excel(file_path, engine='openpyxl', sheet_name='COSTOS_QQ')
 
 # Default file path
-default_file = "/Users/josuer/Documents/DashBoard Fincas/Costos-Streamlit-Santa-Ana/Costos2022_2023 V8.xlsx"
+default_file = st.secrets["default_file_path"]
 
 # Initialize session state variables
 if 'new_lat' not in st.session_state:
@@ -46,13 +46,17 @@ if uploaded_file is not None:
 # The rest of your code remains the same, but wrapped in a condition to check if df is not None
 if st.session_state.df is not None:
     if 'LATITUD' in st.session_state.df.columns and 'LONGITUD' in st.session_state.df.columns:
-        # Your existing code for latitude and longitude inputs
+        # Set default values for latitude and longitude
+        default_lat = 14.066438171238065
+        default_lon = -90.77373649999998
+
+        # Your existing code for latitude and longitude inputs with default values
         new_lat = st.number_input("Ingrese la latitud de la nueva finca:", 
-                                value=float(st.session_state.new_lat),
+                                value=default_lat,
                                 step=1e-6,
                                 format="%.6f")
         new_lon = st.number_input("Ingrese la longitud de la nueva finca:", 
-                                value=float(st.session_state.new_lon),
+                                value=default_lon,
                                 step=1e-6,
                                 format="%.6f")
         
