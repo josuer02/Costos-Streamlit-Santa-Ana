@@ -209,7 +209,7 @@ if st.session_state.df is not None:
 
         # Ajustar el eje Y
         max_value = top_5_fincas[costos_ha].max().max()
-        y_max = ((int(max_value) // 50000) + 1) * 50000  # Redondear al siguiente múltiplo de 50,000
+        y_max = ((float(max_value) // 50000) + 1) * 50000  # Redondear al siguiente múltiplo de 50,000
 
         # Configurar los ticks del eje Y
         y_ticks = np.arange(0, y_max + 50000, 50000)
