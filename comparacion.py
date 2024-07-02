@@ -208,7 +208,6 @@ if st.session_state.df is not None:
         ax.set_title('Desglose de Costos por Hectárea incluyendo la nueva finca')
         ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
         plt.legend(title='Tipo de Costo')
-        plt.ylim(0,500000)
         plt.tight_layout()
         st.pyplot(fig)
 
