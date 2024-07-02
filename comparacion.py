@@ -201,7 +201,6 @@ if st.session_state.df is not None:
 
         top_5_fincas = pd.concat([nueva_finca, top_5_fincas])
 
-
         costos_ha = ['Manejo /ha', 'Renta / ha', 'CAT /ha']
         fig, ax = plt.subplots(figsize=(12, 6))
 
@@ -210,16 +209,16 @@ if st.session_state.df is not None:
 
         # Ajustar el eje Y
         max_value = top_5_fincas[costos_ha].max().max()
-        y_max = ((max_value // 50000) + 1) * 50000  # Redondear al siguiente múltiplo de 50,000
-        ax.set_ylim(0, y_max)
+        y_max = ((int(max_value) // 50000) + 1) * 50000  # Redondear al siguiente múltiplo de 50,000
 
         # Configurar los ticks del eje Y
-        y_ticks = range(0, y_max + 50000, 50000)
+        y_ticks = np.arange(0, y_max + 50000, 50000)
         ax.set_yticks(y_ticks)
 
         # Formatear las etiquetas del eje Y
-        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format(int(x), ',')))
+        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{int(x):,}'))
 
+        ax.set_ylim(0, y_max)
         ax.set_ylabel('Costo por Hectárea (Q)')
         ax.set_title('Desglose de Costos por Hectárea incluyendo la nueva finca')
         ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
