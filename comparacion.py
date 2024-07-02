@@ -117,8 +117,8 @@ if st.session_state.df is not None:
             ).add_to(m)
             
             # Obtener la ruta
-            route = get_route(14.239920460668085,  -90.84192521827173, st.session_state.new_lat, st.session_state.new_lon)
-            
+            route, route_distance = get_route(14.239920460668085,  -90.84192521827173, st.session_state.new_lat, st.session_state.new_lon)
+
             # Dibujar la ruta en el mapa
             folium.PolyLine(
                 locations=route,
@@ -126,13 +126,13 @@ if st.session_state.df is not None:
                 weight=2.5,
                 opacity=0.8
             ).add_to(m)
-            
-            # Añadir un marcador en el medio de la ruta que indique la distancia
-            mid_point = route[len(route)]
+
+            # Añadir un marcador en el medio de la ruta que indique la distancia real
+            mid_point = route[len(route)//2]
             folium.Marker(
                 location=mid_point,
-                popup=f"Distancia al Ingenio: {distancia_ingenio:.2f} km",
-                icon=folium.DivIcon(html=f"""<div style="font-family: Arial; color: black; font-size: 14px;">{distancia_ingenio:.2f} km</div>""")
+                popup=f"Distancia de la ruta: {route_distance:.2f} km",
+                icon=folium.DivIcon(html=f"""<div style="font-family: Arial; color: black; font-size: 14px;">{route_distance:.2f} km</div>""")
             ).add_to(m)
 
         # Añadir marcadores de las fincas al mapa
