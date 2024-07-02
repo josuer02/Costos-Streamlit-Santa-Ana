@@ -128,7 +128,7 @@ if st.session_state.df is not None:
             ).add_to(m)
             
             # Añadir un marcador en el medio de la ruta que indique la distancia
-            mid_point = route[len(route)//2]
+            mid_point = route[len(route)]
             folium.Marker(
                 location=mid_point,
                 popup=f"Distancia al Ingenio: {distancia_ingenio:.2f} km",
@@ -146,7 +146,7 @@ if st.session_state.df is not None:
 
         # Mostrar el mapa en Streamlit
         st_folium(m, width=700, height=500)
-        
+
     else:
         st.error("El DataFrame no contiene columnas 'LATITUD' y 'LONGITUD'.")
 
