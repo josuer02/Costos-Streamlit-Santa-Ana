@@ -210,7 +210,12 @@ if st.session_state.df is not None:
 
         # Ajustar el eje Y
         max_value = top_5_fincas[costos_ha].max().max()
-        ax.set_ylim(0, max_value)  # Establecer el límite superior un 10% por encima del valor máximo
+        y_max = ((max_value // 50000) + 1) * 50000  # Redondear al siguiente múltiplo de 50,000
+        ax.set_ylim(0, y_max)
+
+        # Configurar los ticks del eje Y
+        y_ticks = range(0, y_max + 50000, 50000)
+        ax.set_yticks(y_ticks)
 
         # Formatear las etiquetas del eje Y
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format(int(x), ',')))
