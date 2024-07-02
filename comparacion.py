@@ -203,20 +203,14 @@ if st.session_state.df is not None:
 
         costos_ha = ['Manejo /ha', 'Renta / ha', 'CAT /ha']
         fig, ax = plt.subplots(figsize=(12, 6))
-
-        # Graficar las barras
         top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
-        fig, ax = plt.subplots(figsize=(12, 6))
-
-        # Plot the bars
-        top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
-
-        ax.set_ylabel('Costo por Hectárea (Q)')
+        ax.set_ylabel('Costo por Hectárea')
         ax.set_title('Desglose de Costos por Hectárea incluyendo la nueva finca')
         ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
         plt.legend(title='Tipo de Costo')
         plt.tight_layout()
         st.pyplot(fig)
+
 
         # Gráfico de barras apiladas para el tipo de corte
         if 'PORCENTAJE_CORTE_MANUAL' in top_5_fincas.columns and 'PORCENTAJE_CORTE_MECANIZADO' in top_5_fincas.columns:
