@@ -16,8 +16,6 @@ def get_route(start_lat, start_lon, end_lat, end_lon):
     route = response['routes'][0]['geometry']['coordinates']
     return [(coord[1], coord[0]) for coord in route]
 
-
-
 # Function to load data
 def load_data(file_path):
     return pd.read_excel(file_path, engine='openpyxl', sheet_name='COSTOS_QQ')
@@ -119,7 +117,7 @@ if st.session_state.df is not None:
             ).add_to(m)
             
             # Obtener la ruta
-            route = get_route(sugar_mill_location[0], sugar_mill_location[1], st.session_state.new_lat, st.session_state.new_lon)
+            route = get_route(14.239920460668085,  -90.84192521827173, st.session_state.new_lat, st.session_state.new_lon)
             
             # Dibujar la ruta en el mapa
             folium.PolyLine(
@@ -148,6 +146,7 @@ if st.session_state.df is not None:
 
         # Mostrar el mapa en Streamlit
         st_folium(m, width=700, height=500)
+        
     else:
         st.error("El DataFrame no contiene columnas 'LATITUD' y 'LONGITUD'.")
 
