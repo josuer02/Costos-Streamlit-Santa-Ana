@@ -8,6 +8,16 @@ from streamlit_folium import st_folium
 from math import radians, cos, sin, sqrt, atan2
 import os
 
+import requests
+
+def get_route(start_lat, start_lon, end_lat, end_lon):
+    url = f"http://router.project-osrm.org/route/v1/driving/{start_lon},{start_lat};{end_lon},{end_lat}?overview=full&geometries=geojson"
+    response = requests.get(url).json()
+    route = response['routes'][0]['geometry']['coordinates']
+    return [(coord[1], coord[0]) for coord in route]
+
+
+
 # Function to load data
 def load_data(file_path):
     return pd.read_excel(file_path, engine='openpyxl', sheet_name='COSTOS_QQ')
@@ -66,9 +76,8 @@ if st.session_state.df is not None:
             st.session_state.new_lon = new_lon
             st.session_state.show_new_farm = True
         
-        # Crear un mapa centrado en el ingenio azucarero
         m = folium.Map(location=sugar_mill_location, zoom_start=10)
-        
+
         # Añadir marcador del ingenio azucarero
         folium.Marker(
             location=sugar_mill_location,
@@ -76,7 +85,7 @@ if st.session_state.df is not None:
             tooltip="Ingenio Santa Ana",
             icon=folium.Icon(color='red', icon='home')
         ).add_to(m)
-        
+
         if st.session_state.show_new_farm and st.session_state.new_lat != 0 and st.session_state.new_lon != 0:
             # Función para calcular la distancia usando la fórmula de Haversine
             def haversine(lat1, lon1, lat2, lon2):
@@ -109,22 +118,25 @@ if st.session_state.df is not None:
                 icon=folium.Icon(color='green', icon='plus')
             ).add_to(m)
             
-            # Dibujar una línea entre la nueva finca y el ingenio azucarero
+            # Obtener la ruta
+            route = get_route(sugar_mill_location[0], sugar_mill_location[1], st.session_state.new_lat, st.session_state.new_lon)
+            
+            # Dibujar la ruta en el mapa
             folium.PolyLine(
-                locations=[sugar_mill_location, [st.session_state.new_lat, st.session_state.new_lon]],
+                locations=route,
                 color='blue',
                 weight=2.5,
-                opacity=0.5
+                opacity=0.8
             ).add_to(m)
             
-            # Añadir un marcador en el medio de la línea que indique la distancia
-            mid_point = [(sugar_mill_location[0] + st.session_state.new_lat) / 2, (sugar_mill_location[1] + st.session_state.new_lon) / 2]
+            # Añadir un marcador en el medio de la ruta que indique la distancia
+            mid_point = route[len(route)//2]
             folium.Marker(
                 location=mid_point,
                 popup=f"Distancia al Ingenio: {distancia_ingenio:.2f} km",
                 icon=folium.DivIcon(html=f"""<div style="font-family: Arial; color: black; font-size: 14px;">{distancia_ingenio:.2f} km</div>""")
             ).add_to(m)
-        
+
         # Añadir marcadores de las fincas al mapa
         for idx, row in st.session_state.df.iterrows():
             folium.Marker(
@@ -133,7 +145,7 @@ if st.session_state.df is not None:
                 tooltip=f"Lat: {row['LATITUD']}, Lon: {row['LONGITUD']}",
                 icon=folium.Icon(color='blue', icon='info-sign')
             ).add_to(m)
-        
+
         # Mostrar el mapa en Streamlit
         st_folium(m, width=700, height=500)
     else:
