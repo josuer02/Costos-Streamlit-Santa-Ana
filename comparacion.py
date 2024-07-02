@@ -14,7 +14,8 @@ def get_route(start_lat, start_lon, end_lat, end_lon):
     url = f"http://router.project-osrm.org/route/v1/driving/{start_lon},{start_lat};{end_lon},{end_lat}?overview=full&geometries=geojson"
     response = requests.get(url).json()
     route = response['routes'][0]['geometry']['coordinates']
-    return [(coord[1], coord[0]) for coord in route]
+    distance = response['routes'][0]['distance'] / 1000  # Convertir de metros a kilómetros
+    return [(coord[1], coord[0]) for coord in route], distance
 
 # Function to load data
 def load_data(file_path):
