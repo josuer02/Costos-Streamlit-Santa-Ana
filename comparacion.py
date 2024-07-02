@@ -206,16 +206,21 @@ if st.session_state.df is not None:
 
         # Graficar las barras
         top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
 
-        # Ajustar el eje Y
+        # Plot the bars
+        top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
+
+        # Adjust the y-axis
         max_value = top_5_fincas[costos_ha].max().max()
-        y_max = ((float(max_value) // 50000) + 1) * 50000  # Redondear al siguiente múltiplo de 50,000
+        y_max = int(((max_value // 50000) + 1) * 50000)  # Round to the next multiple of 50,000
 
-        # Configurar los ticks del eje Y
+        # Set y-axis ticks
         y_ticks = np.arange(0, y_max + 50000, 50000)
         ax.set_yticks(y_ticks)
 
-        # Formatear las etiquetas del eje Y
+        # Format y-axis labels
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{int(x):,}'))
 
         ax.set_ylim(0, y_max)
