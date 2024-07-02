@@ -202,11 +202,20 @@ if st.session_state.df is not None:
         top_5_fincas = pd.concat([nueva_finca, top_5_fincas])
 
 
-        # Gráfico de barras para costos por hectárea
         costos_ha = ['Manejo /ha', 'Renta / ha', 'CAT /ha']
         fig, ax = plt.subplots(figsize=(12, 6))
+
+        # Graficar las barras
         top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
-        ax.set_ylabel('Costo por Hectárea')
+
+        # Ajustar el eje Y
+        max_value = top_5_fincas[costos_ha].max().max()
+        ax.set_ylim(0, max_value * 1.1)  # Establecer el límite superior un 10% por encima del valor máximo
+
+        # Formatear las etiquetas del eje Y
+        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format(int(x), ',')))
+
+        ax.set_ylabel('Costo por Hectárea (Q)')
         ax.set_title('Desglose de Costos por Hectárea incluyendo la nueva finca')
         ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
         plt.legend(title='Tipo de Costo')
