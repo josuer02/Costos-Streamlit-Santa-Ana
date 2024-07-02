@@ -206,24 +206,11 @@ if st.session_state.df is not None:
 
         # Graficar las barras
         top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
-        
         fig, ax = plt.subplots(figsize=(12, 6))
 
         # Plot the bars
         top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
 
-        # Adjust the y-axis
-        max_value = top_5_fincas[costos_ha].max().max()
-        y_max = int(((max_value // 50000) + 1) * 50000)  # Round to the next multiple of 50,000
-
-        # Set y-axis ticks
-        y_ticks = np.arange(0, y_max + 50000, 50000)
-        ax.set_yticks(y_ticks)
-
-        # Format y-axis labels
-        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{int(x):,}'))
-
-        ax.set_ylim(0, y_max)
         ax.set_ylabel('Costo por Hectárea (Q)')
         ax.set_title('Desglose de Costos por Hectárea incluyendo la nueva finca')
         ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
