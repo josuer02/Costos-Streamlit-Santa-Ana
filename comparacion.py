@@ -17,6 +17,9 @@ def get_route(start_lat, start_lon, end_lat, end_lon):
     distance = response['routes'][0]['distance'] / 1000  # Convertir de metros a kilómetros
     return [(coord[1], coord[0]) for coord in route], distance
 
+def costo_por_area(costo, area):
+    return costo * area if area > 0 else 0
+
 # Function to load data
 def load_data(file_path):
     return pd.read_excel(file_path, engine='openpyxl', sheet_name='COSTOS_QQ')
@@ -268,6 +271,94 @@ if st.session_state.df is not None:
         st.write("Por favor, carga un archivo Excel para comenzar el análisis.")
 
 
+    st.subheader("Análisis de Costos")
+
+    # New inputs for cost analysis
+    area_arrendada = st.number_input("Area Arrendada (Has):", value=400, step=100)
+    area_productiva = st.number_input("Area Productiva (Has):", value=360, step=100)
+    rendimiento = st.number_input("Rendimiento (Lbs/TC):", value=220.0, step=0.1, format="%.1f")
+    productividad = st.number_input("Productividad (THC):", value=115)
+    tipo_de_cambio = st.number_input("Tipo de Cambio:", value=7.85, step=0.01, format="%.2f")
+
+    cat_option = st.selectbox("CAT:", ["Con depreciación", "Sin depreciación"])
+    cat_value = 7.61 if cat_option == "Con depreciación" else 4.8
+    
+    caña_tc = area_productiva * productividad
+    azucar_qq = caña_tc * rendimiento /100
+    azucar_tc = azucar_qq / 21.739
+
+    total_cat = cat_value * caña_tc
+
+    cat_ha = total_cat/area_productiva
+
+    cat_qq = total_cat/azucar_qq
+    
+
+    df_costos_v1 = pd.DataFrame({
+        'Tipo CAT': ['CAT'],
+        'Por Ha': [total_cat/area_productiva],
+        'Por TC': [cat_value],
+        'Por QQ': [total_cat/azucar_qq],
+        'Total' : [total_cat]
+    })
+
+    st.write(df_costos_v1)
+
+    st.subheader("Manejo Agrícola")
+    costo_riego = st.number_input("Costo de riego", min_value=0.0, value=0.0, step=0.01)
+    costo_riego_por_area = costo_por_area(costo_riego, area_productiva)
+
+    costo_fertilizacion = st.number_input("Costo de fertilización", min_value=0.0, value=0.0, step=0.01)
+    costo_fertilizacion_por_area = costo_por_area(costo_fertilizacion, area_productiva)
+
+    costo_malezas = st.number_input("Costo de control de malezas", min_value=0.0, value=0.0, step=0.01)
+    costo_malezas_por_area = costo_por_area(costo_malezas, area_productiva)
+
+    costo_plagas = st.number_input("Costo de manejo de plagas", min_value=0.0, value=0.0, step=0.01)
+    costo_plagas_por_area = costo_por_area(costo_plagas, area_productiva)
+
+    costo_administracion = st.number_input("Costo de administración", min_value=0.0, value=0.0, step=0.01)
+    costo_administracion_por_area = costo_por_area(costo_administracion, area_productiva)
+
+    costo_total_agri = costo_riego + costo_fertilizacion + costo_malezas + costo_plagas + costo_administracion
+    costo_total_agri_p_area = costo_riego_por_area + costo_fertilizacion_por_area + costo_malezas_por_area + costo_plagas_por_area+costo_administracion_por_area
+    costo_agri_qq_total = costo_total_agri_p_area / azucar_qq
+
+    st.write(f"Costo total: ${costo_total_agri:.2f}")
+
+
+    st.subheader("Arrendamiento")
+
+    costo_arrendamiento_fijo = st.number_input("Costo de arrendamiento fijo", min_value=0.0, value=0.0, step=0.01)
+    costo_arrendamiento_variable = st.number_input("Costo de arrendamiento variable", min_value=0.0, value=0.0, step=0.01)
+    costo_arrendamiento_total = costo_arrendamiento_fijo + costo_arrendamiento_variable
+
+    costo_arrendamiento_por_area_fijo = costo_por_area(costo_arrendamiento_fijo, area_arrendada)
+    costo_arrendamiento_por_area_variable = costo_por_area(costo_arrendamiento_variable, area_arrendada)
+    costo_arrendamiento_por_area_total = costo_arrendamiento_por_area_variable+costo_arrendamiento_por_area_fijo
+    costo_arrendamiento_tot_qq = costo_arrendamiento_por_area_total / azucar_qq
+
+    st.write(f"Costo total: ${costo_arrendamiento_total:.2f}")
+    
+    st.header("Inversiones")
+    costo_capex = st.number_input("Costo CAPEX (inversiones de capital)", min_value=0.0, value=0.0, step=0.01)
+    costo_renovacion = st.number_input("Costo de renovación", min_value=0.0, value=0.0, step=0.01)
+    costo_inversiones_total = costo_capex + costo_renovacion
+    
+    costo_capex_por_area = costo_por_area(costo_capex, area_productiva)
+    costo_renovacion_por_area = costo_por_area(costo_renovacion, area_productiva)
+    costo_inversiones_p_area = costo_capex_por_area+costo_renovacion_por_area
+    costo_inversiones_qq = costo_inversiones_p_area/azucar_qq
+
+    st.write(f"Costo total: ${costo_inversiones_total:.2f}")
+
+    costo_de_caña_en_patio = cat_ha + costo_total_agri + costo_arrendamiento_total + costo_inversiones_total
+
+    st.markdown(f"<h3 style='color: green;'>Costo total en patio: ${costo_de_caña_en_patio:,.2f}</h3>", unsafe_allow_html=True)
+    
+    costo_de_caña_en_patio_qq = costo_inversiones_qq + costo_arrendamiento_tot_qq + costo_agri_qq_total + cat_qq
+    #st.write(costo_de_caña_en_patio_qq)
+
     st.subheader("Análisis de Ingresos")
 
     # Usar los inputs existentes para los datos base
@@ -280,11 +371,26 @@ if st.session_state.df is not None:
     df_ingresos = pd.DataFrame({
         'Tipo': ['Crudo', 'VHP', 'Refino', 'Local'],
         'Precio': [precio_ny_11, precio_ny_11 + prima_vhp, precio_ny_11 + white_premium, precio_local],
-        'Local': [0.04, 0.12, 0.34, 0.51],
-        'Solo exp': [0.09, 0.23, 0.68, 0.00],
+        'Local': [0.0421052631578947, 0.115789473684211, 0.336842105263158, 0.505263157894737],
+        'Solo exp': [0.0851063829787234, 0.234042553191489, 0.680851063829787, 0.00],
         'Crudo': [1.00, 0.00, 0.00, 0.00]
     })
 
+    base_fabrica = 1.82939469645536
+
+    df_costos_fabrica = pd.DataFrame({
+        'Costo': [base_fabrica, base_fabrica+0.815424721259047, base_fabrica+2.02016467433601, base_fabrica+0.439909136083208],
+        'Local': [0.0421052631578947, 0.115789473684211, 0.336842105263158, 0.505263157894737],
+        'Solo exp': [0.0851063829787234, 0.234042553191489, 0.680851063829787, 0.00],
+        'Crudo': [1.00, 0.00, 0.00, 0.00]
+    })
+
+    df_costo_transporte = pd.DataFrame({
+        'Costo': [0.25, 0.25, 0.25, 0.08],
+        'Local': [0.0421052631578947, 0.115789473684211, 0.336842105263158, 0.505263157894737],
+        'Solo exp': [0.0851063829787234, 0.234042553191489, 0.680851063829787, 0.00],
+        'Crudo': [1.00, 0.00, 0.00, 0.00]
+    })
     # Selector para el escenario
     escenario = st.selectbox("Seleccione el escenario:", ["Comercialización", "a 15$ el Crudo", "Ingreso Manual"])
 
@@ -308,24 +414,78 @@ if st.session_state.df is not None:
 
     if tipo_venta == "Con Local":
         df_ingresos['Porcentaje'] = df_ingresos['Local']
+        df_costos_fabrica['Porcentaje'] = df_costos_fabrica['Local']
+        df_costo_transporte['Porcentaje'] = df_costo_transporte['Local']
+
     elif tipo_venta == "Solo Exportación":
         df_ingresos['Porcentaje'] = df_ingresos['Solo exp']
+        df_costos_fabrica['Porcentaje'] = df_costos_fabrica['Solo exp']
+        df_costo_transporte['Porcentaje'] = df_costo_transporte['Solo exp']
+
+
     else:  # Solo Crudo
         df_ingresos['Porcentaje'] = df_ingresos['Crudo']
+        df_costos_fabrica['Porcentaje'] = df_costos_fabrica['Crudo']
+        df_costo_transporte['Porcentaje'] = df_costo_transporte['Crudo']
+
+
+    df_costos_fabrica['Ponderado'] = df_costos_fabrica['Costo'] * df_costos_fabrica['Porcentaje']
+    total_ponderado_fabrica = df_costos_fabrica['Ponderado'].sum()
+
+    st.subheader("Fabrica")
+    st.write(df_costos_fabrica)
+    st.write(f"Total Ponderado Fabrica: ${total_ponderado_fabrica:.2f}")
+    #st.write(df_costos_fabrica)
+    total_fabrica = azucar_qq * df_costos_fabrica['Ponderado']
+
+    #st.write(total_fabrica)
+
+    df_costo_transporte['Ponderado'] = df_costo_transporte['Costo'] * df_costo_transporte['Porcentaje']
+    total_ponderado_transporte = df_costo_transporte['Ponderado'].sum()
+    st.subheader("Transporte")
+    st.write(df_costo_transporte)
+    st.write(f"Total Ponderado Transporte: ${total_ponderado_transporte:.2f}")
+
+    total_fabrica = azucar_qq * df_costos_fabrica['Ponderado']
 
     df_ingresos['Ponderado'] = df_ingresos['Precio'] * df_ingresos['Porcentaje']
     total_ponderado = df_ingresos['Ponderado'].sum()
 
-    contribuciones = 4.98  # Valor fijo de contribuciones
+    contribuciones = 2.386363636+2.590909091 # Valor fijo de contribuciones
     total_ingresos = total_ponderado + contribuciones
 
+
+    
+
+
     # Mostrar resultados
+    st.subheader("Ingresos")
     st.write(df_ingresos)
     st.write(f"Total Ponderado: ${total_ponderado:.2f}")
     st.write(f"Contribuciones: ${contribuciones:.2f}")
     st.write(f"Total Ingresos: ${total_ingresos:.2f}")
+    total_ingresos_qq = (total_ponderado+contribuciones)*azucar_qq
 
+    st.markdown(f"<h3 style='color: green;'>Ingreso Total: ${total_ingresos_qq:,.1f}</h3>", unsafe_allow_html=True)
+
+
+    costos_total = costo_de_caña_en_patio_qq + total_ponderado_fabrica + total_ponderado_transporte
+    st.write(f"Margen: ${total_ingresos - costos_total:.2f}")
+    st.markdown(f"<h3 style='color: green;'>Margen: ${(total_ingresos-costos_total)*azucar_qq:,.2f}</h3>", unsafe_allow_html=True)
+
+    
+
+    df_ingresos['Totales'] = df_ingresos['Ponderado'] * azucar_qq 
+    total_ponderado_qq = total_ponderado * azucar_qq
+    total_contrib_qq = contribuciones * azucar_qq
+    total_azu = df_ingresos['Totales'].sum()
+
+
+    #st.write("Ingresos totales", df_ingresos['Totales'])
     # Gráfico de barras para mostrar la distribución de ingresos
+    
+
+
     chart = alt.Chart(df_ingresos).mark_bar().encode(
         x='Tipo',
         y='Ponderado',
