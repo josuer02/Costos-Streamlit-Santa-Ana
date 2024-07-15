@@ -154,123 +154,123 @@ if st.session_state.df is not None:
 
     else:
         st.error("El DataFrame no contiene columnas 'LATITUD' y 'LONGITUD'.")
-    #TODO PEDIR LOS INPUTS DEL EXCEL (AREAS..) INGRESO DE RENTA EN MANZANA
-    st.subheader("Análisis de Costos y Producción")
+    # #TODO PEDIR LOS INPUTS DEL EXCEL (AREAS..) INGRESO DE RENTA EN MANZANA
+    # st.subheader("Análisis de Costos y Producción")
 
-    # Filtros para la nueva finca
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        nuevo_manejo = st.number_input("Manejo de la nueva finca:", min_value=0.0, format="%.2f") #HA
-        nueva_renta = st.number_input("Renta de la nueva finca:", min_value=0.0, format="%.2f") #MZN PASAR A HA
-    with col2:
-        nuevo_cat = st.number_input("CAT de la nueva finca:", min_value=0.0, format="%.2f") #TC O HA
-        nueva_area = st.number_input("Área de la nueva finca:", min_value=0.0, format="%.2f") #SPLIT EN PRODUCTIVA Y EN ARRENDADA
-    with col3:
-        if st.session_state.df is not None:
-            grupos_disponibles = ['Todos'] + list(st.session_state.df['GRUPO'].unique())
-            grupo_seleccionado = st.selectbox("Filtrar por GRUPO:", grupos_disponibles)
-        else:
-            st.write("Carga un archivo para ver opciones de grupo.")
+    # # Filtros para la nueva finca
+    # col1, col2, col3 = st.columns(3)
+    # with col1:
+    #     nuevo_manejo = st.number_input("Manejo de la nueva finca:", min_value=0.0, format="%.2f") #HA
+    #     nueva_renta = st.number_input("Renta de la nueva finca:", min_value=0.0, format="%.2f") #MZN PASAR A HA
+    # with col2:
+    #     nuevo_cat = st.number_input("CAT de la nueva finca:", min_value=0.0, format="%.2f") #TC O HA
+    #     nueva_area = st.number_input("Área de la nueva finca:", min_value=0.0, format="%.2f") #SPLIT EN PRODUCTIVA Y EN ARRENDADA
+    # with col3:
+    #     if st.session_state.df is not None:
+    #         grupos_disponibles = ['Todos'] + list(st.session_state.df['GRUPO'].unique())
+    #         grupo_seleccionado = st.selectbox("Filtrar por GRUPO:", grupos_disponibles)
+    #     else:
+    #         st.write("Carga un archivo para ver opciones de grupo.")
         
-        # Nuevo filtro para el tipo de corte
-        tipo_corte = st.selectbox("Tipo de corte para la nueva finca:", ["Manual", "Mecanizado"])
+    #     # Nuevo filtro para el tipo de corte
+    #     tipo_corte = st.selectbox("Tipo de corte para la nueva finca:", ["Manual", "Mecanizado"])
 
-    if st.session_state.df is not None:
-        # Filtrar el DataFrame
-        if grupo_seleccionado != 'Todos':
-            df_filtered = st.session_state.df[st.session_state.df['GRUPO'] == grupo_seleccionado]
-        else:
-            df_filtered = st.session_state.df
+    # if st.session_state.df is not None:
+    #     # Filtrar el DataFrame
+    #     if grupo_seleccionado != 'Todos':
+    #         df_filtered = st.session_state.df[st.session_state.df['GRUPO'] == grupo_seleccionado]
+    #     else:
+    #         df_filtered = st.session_state.df
 
-        # Ordenar y seleccionar las 5 fincas más cercanas
-        if 'DISTANCIA' in df_filtered.columns:
-            top_5_fincas = df_filtered.sort_values(by='DISTANCIA').head(5)
-        else:
-            top_5_fincas = df_filtered.head(5)
+    #     # Ordenar y seleccionar las 5 fincas más cercanas
+    #     if 'DISTANCIA' in df_filtered.columns:
+    #         top_5_fincas = df_filtered.sort_values(by='DISTANCIA').head(5)
+    #     else:
+    #         top_5_fincas = df_filtered.head(5)
 
-        # Añadir la nueva finca a la comparación
-        nueva_finca = pd.DataFrame({
-            'NOMFIN': ['Nueva Finca'],
-            'MANEJO SIN INV.': [nuevo_manejo],
-            'RENTA': [nueva_renta],
-            'CAT': [nuevo_cat],
-            'AREA': [nueva_area],
-            'Manejo /ha': [nuevo_manejo / nueva_area if nueva_area > 0 else 0],
-            'Renta / ha': [nueva_renta / nueva_area if nueva_area > 0 else 0],
-            'CAT /ha': [nuevo_cat / nueva_area if nueva_area > 0 else 0],
-            'TOTAL SIN INV': [nuevo_manejo + nueva_renta + nuevo_cat],
-            'PORCENTAJE_CORTE_MANUAL': [1.00 if tipo_corte == "Manual" else 0],
-            'PORCENTAJE_CORTE_MECANIZADO': [1.00 if tipo_corte == "Mecanizado" else 0]
-        })
+    #     # Añadir la nueva finca a la comparación
+    #     nueva_finca = pd.DataFrame({
+    #         'NOMFIN': ['Nueva Finca'],
+    #         'MANEJO SIN INV.': [nuevo_manejo],
+    #         'RENTA': [nueva_renta],
+    #         'CAT': [nuevo_cat],
+    #         'AREA': [nueva_area],
+    #         'Manejo /ha': [nuevo_manejo / nueva_area if nueva_area > 0 else 0],
+    #         'Renta / ha': [nueva_renta / nueva_area if nueva_area > 0 else 0],
+    #         'CAT /ha': [nuevo_cat / nueva_area if nueva_area > 0 else 0],
+    #         'TOTAL SIN INV': [nuevo_manejo + nueva_renta + nuevo_cat],
+    #         'PORCENTAJE_CORTE_MANUAL': [1.00 if tipo_corte == "Manual" else 0],
+    #         'PORCENTAJE_CORTE_MECANIZADO': [1.00 if tipo_corte == "Mecanizado" else 0]
+    #     })
 
-        #TODO CHANGE EJE, BUSCAR OTRA LIBRERIA
-        top_5_fincas = pd.concat([nueva_finca, top_5_fincas])
+    #     #TODO CHANGE EJE, BUSCAR OTRA LIBRERIA
+    #     top_5_fincas = pd.concat([nueva_finca, top_5_fincas])
 
-        costos_ha = ['Manejo /ha', 'Renta / ha', 'CAT /ha']
-        fig, ax = plt.subplots(figsize=(12, 6))
-        top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
-        ax.set_ylabel('Costo por Hectárea')
-        ax.set_title('Desglose de Costos por Hectárea incluyendo la nueva finca')
-        ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
-        plt.legend(title='Tipo de Costo')
-        plt.tight_layout()
-        st.pyplot(fig)
+    #     costos_ha = ['Manejo /ha', 'Renta / ha', 'CAT /ha']
+    #     fig, ax = plt.subplots(figsize=(12, 6))
+    #     top_5_fincas[costos_ha].plot(kind='bar', ax=ax)
+    #     ax.set_ylabel('Costo por Hectárea')
+    #     ax.set_title('Desglose de Costos por Hectárea incluyendo la nueva finca')
+    #     ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
+    #     plt.legend(title='Tipo de Costo')
+    #     plt.tight_layout()
+    #     st.pyplot(fig)
 
 
-        # Gráfico de barras apiladas para el tipo de corte
-        if 'PORCENTAJE_CORTE_MANUAL' in top_5_fincas.columns and 'PORCENTAJE_CORTE_MECANIZADO' in top_5_fincas.columns:
-            fig, ax = plt.subplots(figsize=(12, 6))
+    #     # Gráfico de barras apiladas para el tipo de corte
+    #     if 'PORCENTAJE_CORTE_MANUAL' in top_5_fincas.columns and 'PORCENTAJE_CORTE_MECANIZADO' in top_5_fincas.columns:
+    #         fig, ax = plt.subplots(figsize=(12, 6))
             
-            # Multiplicar los valores por 100 para convertirlos a porcentajes
-            data_to_plot = top_5_fincas[['PORCENTAJE_CORTE_MANUAL', 'PORCENTAJE_CORTE_MECANIZADO']] * 100
+    #         # Multiplicar los valores por 100 para convertirlos a porcentajes
+    #         data_to_plot = top_5_fincas[['PORCENTAJE_CORTE_MANUAL', 'PORCENTAJE_CORTE_MECANIZADO']] * 100
             
-            data_to_plot.plot(kind='bar', stacked=True, ax=ax)
-            ax.set_ylabel('Porcentaje')
-            ax.set_title('Distribución del Tipo de Corte')
-            ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
-            plt.legend(title='Tipo de Corte')
+    #         data_to_plot.plot(kind='bar', stacked=True, ax=ax)
+    #         ax.set_ylabel('Porcentaje')
+    #         ax.set_title('Distribución del Tipo de Corte')
+    #         ax.set_xticklabels(top_5_fincas['NOMFIN'], rotation=45, ha='right')
+    #         plt.legend(title='Tipo de Corte')
             
-            # Añadir etiquetas con los valores
-            for c in ax.containers:
-                ax.bar_label(c, fmt='%.1f%%', label_type='center')
+    #         # Añadir etiquetas con los valores
+    #         for c in ax.containers:
+    #             ax.bar_label(c, fmt='%.1f%%', label_type='center')
             
-            # Ajustar el límite superior del eje y a 100%
-            ax.set_ylim(0, 100)
+    #         # Ajustar el límite superior del eje y a 100%
+    #         ax.set_ylim(0, 100)
             
-            plt.tight_layout()
-            st.pyplot(fig)
-        else:
-            st.write("No hay datos disponibles sobre el tipo de corte.")
+    #         plt.tight_layout()
+    #         st.pyplot(fig)
+    #     else:
+    #         st.write("No hay datos disponibles sobre el tipo de corte.")
 
-        # Gráfico de dispersión para Área vs. Producción con línea de tendencia
-        if 'TONS' in top_5_fincas.columns:
-            fig, ax = plt.subplots(figsize=(10, 6))
+    #     # Gráfico de dispersión para Área vs. Producción con línea de tendencia
+    #     if 'TONS' in top_5_fincas.columns:
+    #         fig, ax = plt.subplots(figsize=(10, 6))
             
-            # Asegurarse de que los datos son numéricos
-            x = top_5_fincas['AREA'].astype(float)
-            y = top_5_fincas['TONS'].astype(float)
+    #         # Asegurarse de que los datos son numéricos
+    #         x = top_5_fincas['AREA'].astype(float)
+    #         y = top_5_fincas['TONS'].astype(float)
             
-            # Graficar los puntos
-            ax.scatter(x, y)
+    #         # Graficar los puntos
+    #         ax.scatter(x, y)
             
-            # Añadir línea de tendencia
-            z = np.polyfit(x, y, 1)
-            p = np.poly1d(z)
-            ax.plot(x, p(x), "r--", alpha=0.8)
+    #         # Añadir línea de tendencia
+    #         z = np.polyfit(x, y, 1)
+    #         p = np.poly1d(z)
+    #         ax.plot(x, p(x), "r--", alpha=0.8)
             
-            ax.set_xlabel('Área')
-            ax.set_ylabel('Toneladas producidas')
-            ax.set_title('Relación Área vs. Producción incluyendo la nueva finca')
+    #         ax.set_xlabel('Área')
+    #         ax.set_ylabel('Toneladas producidas')
+    #         ax.set_title('Relación Área vs. Producción incluyendo la nueva finca')
             
-            for i, txt in enumerate(top_5_fincas['NOMFIN']):
-                ax.annotate(txt, (x.iloc[i], y.iloc[i]))
+    #         for i, txt in enumerate(top_5_fincas['NOMFIN']):
+    #             ax.annotate(txt, (x.iloc[i], y.iloc[i]))
             
-            plt.tight_layout()
-            st.pyplot(fig)
-        else:
-            st.write("No hay datos de producción disponibles para mostrar el gráfico de Área vs. Producción.")
-    else:
-        st.write("Por favor, carga un archivo Excel para comenzar el análisis.")
+    #         plt.tight_layout()
+    #         st.pyplot(fig)
+    #     else:
+    #         st.write("No hay datos de producción disponibles para mostrar el gráfico de Área vs. Producción.")
+    # else:
+    #     st.write("Por favor, carga un archivo Excel para comenzar el análisis.")
 
     st.sidebar.header("Inputs")
 
