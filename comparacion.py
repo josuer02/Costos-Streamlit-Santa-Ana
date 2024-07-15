@@ -1,3 +1,4 @@
+import math
 import streamlit as st
 import pandas as pd
 import folium
@@ -153,17 +154,17 @@ if st.session_state.df is not None:
 
     else:
         st.error("El DataFrame no contiene columnas 'LATITUD' y 'LONGITUD'.")
-
+    #TODO PEDIR LOS INPUTS DEL EXCEL (AREAS..) INGRESO DE RENTA EN MANZANA
     st.subheader("Análisis de Costos y Producción")
 
     # Filtros para la nueva finca
     col1, col2, col3 = st.columns(3)
     with col1:
-        nuevo_manejo = st.number_input("Manejo de la nueva finca:", min_value=0.0, format="%.2f")
-        nueva_renta = st.number_input("Renta de la nueva finca:", min_value=0.0, format="%.2f")
+        nuevo_manejo = st.number_input("Manejo de la nueva finca:", min_value=0.0, format="%.2f") #HA
+        nueva_renta = st.number_input("Renta de la nueva finca:", min_value=0.0, format="%.2f") #MZN PASAR A HA
     with col2:
-        nuevo_cat = st.number_input("CAT de la nueva finca:", min_value=0.0, format="%.2f")
-        nueva_area = st.number_input("Área de la nueva finca:", min_value=0.0, format="%.2f")
+        nuevo_cat = st.number_input("CAT de la nueva finca:", min_value=0.0, format="%.2f") #TC O HA
+        nueva_area = st.number_input("Área de la nueva finca:", min_value=0.0, format="%.2f") #SPLIT EN PRODUCTIVA Y EN ARRENDADA
     with col3:
         if st.session_state.df is not None:
             grupos_disponibles = ['Todos'] + list(st.session_state.df['GRUPO'].unique())
@@ -202,6 +203,7 @@ if st.session_state.df is not None:
             'PORCENTAJE_CORTE_MECANIZADO': [1.00 if tipo_corte == "Mecanizado" else 0]
         })
 
+        #TODO CHANGE EJE, BUSCAR OTRA LIBRERIA
         top_5_fincas = pd.concat([nueva_finca, top_5_fincas])
 
         costos_ha = ['Manejo /ha', 'Renta / ha', 'CAT /ha']
@@ -270,94 +272,125 @@ if st.session_state.df is not None:
     else:
         st.write("Por favor, carga un archivo Excel para comenzar el análisis.")
 
+    st.sidebar.header("Inputs")
 
-    st.subheader("Análisis de Costos")
+    st.sidebar.subheader("Inputs Técnicos")
+    area_arrendada = st.sidebar.number_input("Área Arrendada (Has):", value=400, step=100)
+    area_productiva = st.sidebar.number_input("Área Productiva (Has):", value=360, step=100)
+    rendimiento = st.sidebar.number_input("Rendimiento (Lbs/TC):", value=220.0, step=0.1, format="%.1f")
+    productividad = st.sidebar.number_input("Productividad (TCH):", value=115)
+    tipo_de_cambio = st.sidebar.number_input("Tipo de Cambio:", value=7.85, step=0.01, format="%.2f")
 
-    # New inputs for cost analysis
-    area_arrendada = st.number_input("Area Arrendada (Has):", value=400, step=100)
-    area_productiva = st.number_input("Area Productiva (Has):", value=360, step=100)
-    rendimiento = st.number_input("Rendimiento (Lbs/TC):", value=220.0, step=0.1, format="%.1f")
-    productividad = st.number_input("Productividad (THC):", value=115)
-    tipo_de_cambio = st.number_input("Tipo de Cambio:", value=7.85, step=0.01, format="%.2f")
-
-    cat_option = st.selectbox("CAT:", ["Con depreciación", "Sin depreciación"])
+    cat_option = st.sidebar.selectbox("CAT:", ["Con depreciación", "Sin depreciación"])
     cat_value = 7.61 if cat_option == "Con depreciación" else 4.8
-    
+
+    # Inputs de manejo
+    st.sidebar.subheader("Manejo Agrícola")
+    costo_riego = st.sidebar.number_input("Costo de riego", min_value=0.0, value=0.0, step=0.01)
+    costo_fertilizacion = st.sidebar.number_input("Costo de fertilización", min_value=0.0, value=0.0, step=0.01)
+    costo_malezas = st.sidebar.number_input("Costo de control de malezas", min_value=0.0, value=0.0, step=0.01)
+    costo_plagas = st.sidebar.number_input("Costo de manejo de plagas", min_value=0.0, value=0.0, step=0.01)
+    costo_administracion = st.sidebar.number_input("Costo de administración", min_value=0.0, value=0.0, step=0.01)
+
+    # Inputs de arrendamiento
+    st.sidebar.subheader("Arrendamiento")
+    costo_arrendamiento_fijo_mz = st.sidebar.number_input("Costo de arrendamiento fijo (Mz)", min_value=0.0, value=0.0, step=0.01)
+    costo_arrendamiento_fijo = math.ceil(costo_arrendamiento_fijo_mz * 1.43115)
+
+    base_arrend = st.sidebar.number_input("Ingrese el precio base: ", min_value=0.0, value=0.0, step=0.01)
+    incremento_arrend = st.sidebar.number_input("Ingrese el incremento negociado: ", min_value=0.0, value=0.0, step=0.01)
+    precio_ny_11_arrend = st.sidebar.number_input("Ingrese el precioNY11: ", min_value=0.0, value=19.00, step=0.01)
+
+    if precio_ny_11_arrend > base_arrend: 
+        costo_arrendamiento_variable = (precio_ny_11_arrend - base_arrend)*incremento_arrend
+    else:
+        0
+
+    #costo_arrendamiento_variable = st.sidebar.number_input("Costo de arrendamiento variable", min_value=0.0, value=0.0, step=0.01)
+
+    # Inputs de inversiones
+    st.sidebar.subheader("Inversiones")
+    costo_capex = st.sidebar.number_input("Costo CAPEX (inversiones de capital)", min_value=0.0, value=0.0, step=0.01)
+    costo_renovacion = st.sidebar.number_input("Costo de renovación", min_value=0.0, value=0.0, step=0.01)
+
+    # Contenido principal
+    st.title("Análisis de Costos e Ingresos")
+
+    # Cálculos iniciales
     caña_tc = area_productiva * productividad
-    azucar_qq = caña_tc * rendimiento /100
+    azucar_qq = caña_tc * rendimiento* (22.0462/21.739)/ 100
     azucar_tc = azucar_qq / 21.739
 
     total_cat = cat_value * caña_tc
+    cat_ha = total_cat / area_productiva
+    cat_qq = total_cat / azucar_qq
 
-    cat_ha = total_cat/area_productiva
+    # Mostrar resultados iniciales
+    st.subheader("Resultados Iniciales")
+    st.write(f"Caña TC: {caña_tc:,.2f}")
+    st.write(f"Azúcar QQ: {azucar_qq:,.2f}")
+    st.write(f"Azúcar TC: {azucar_tc:,.2f}")
 
-    cat_qq = total_cat/azucar_qq
-    
-
+    # CAT
+    st.subheader("CAT (Costo Agrícola Total)")
     df_costos_v1 = pd.DataFrame({
         'Tipo CAT': ['CAT'],
-        'Por Ha': [total_cat/area_productiva],
+        'Por Ha': [cat_ha],
         'Por TC': [cat_value],
-        'Por QQ': [total_cat/azucar_qq],
-        'Total' : [total_cat]
+        'Por QQ': [cat_qq],
+        'Total': [total_cat]
     })
-
     st.write(df_costos_v1)
 
+    # Manejo Agrícola
     st.subheader("Manejo Agrícola")
-    costo_riego = st.number_input("Costo de riego (Ha): ", min_value=0.0, value=0.0, step=0.01)
+    costo_total_agri = costo_riego + costo_fertilizacion + costo_malezas + costo_plagas + costo_administracion
+
     costo_riego_por_area = costo_por_area(costo_riego, area_productiva)
-
-    costo_fertilizacion = st.number_input("Costo de fertilización (Ha):", min_value=0.0, value=0.0, step=0.01)
     costo_fertilizacion_por_area = costo_por_area(costo_fertilizacion, area_productiva)
-
-    costo_malezas = st.number_input("Costo de control de malezas (Ha):", min_value=0.0, value=0.0, step=0.01)
     costo_malezas_por_area = costo_por_area(costo_malezas, area_productiva)
-
-    costo_plagas = st.number_input("Costo de manejo de plagas (Ha):", min_value=0.0, value=0.0, step=0.01)
     costo_plagas_por_area = costo_por_area(costo_plagas, area_productiva)
-
-    costo_administracion = st.number_input("Costo de administración (Ha):", min_value=0.0, value=0.0, step=0.01)
     costo_administracion_por_area = costo_por_area(costo_administracion, area_productiva)
 
     costo_total_agri = costo_riego + costo_fertilizacion + costo_malezas + costo_plagas + costo_administracion
     costo_total_agri_p_area = costo_riego_por_area + costo_fertilizacion_por_area + costo_malezas_por_area + costo_plagas_por_area+costo_administracion_por_area
     costo_agri_qq_total = costo_total_agri_p_area / azucar_qq
 
-    st.write(f"Costo total: ${costo_total_agri:.2f}")
 
+    st.write(f"Costo total manejo agrícola (Ha): ${costo_total_agri:.2f}")
 
+    # Arrendamiento
     st.subheader("Arrendamiento")
-
-    costo_arrendamiento_fijo = st.number_input("Costo de arrendamiento fijo (Ha):", min_value=0.0, value=0.0, step=0.01)
-    costo_arrendamiento_variable = st.number_input("Costo de arrendamiento variable (Ha):", min_value=0.0, value=0.0, step=0.01)
     costo_arrendamiento_total = costo_arrendamiento_fijo + costo_arrendamiento_variable
 
     costo_arrendamiento_por_area_fijo = costo_por_area(costo_arrendamiento_fijo, area_arrendada)
     costo_arrendamiento_por_area_variable = costo_por_area(costo_arrendamiento_variable, area_arrendada)
+
     costo_arrendamiento_por_area_total = costo_arrendamiento_por_area_variable+costo_arrendamiento_por_area_fijo
     costo_arrendamiento_tot_qq = costo_arrendamiento_por_area_total / azucar_qq
 
-    st.write(f"Costo total: ${costo_arrendamiento_total:.2f}")
-    
-    st.header("Inversiones")
-    costo_capex = st.number_input("Costo CAPEX (inversiones de capital) (Ha):", min_value=0.0, value=0.0, step=0.01)
-    costo_renovacion = st.number_input("Costo de renovación (Ha):", min_value=0.0, value=0.0, step=0.01)
+    st.write(f"Costo total arrendamiento (Ha): ${costo_arrendamiento_total:.2f}")
+    #
+    # st.write("Costo Fijo", costo_arrendamiento_fijo)
+    #st.write("Costo Variable", costo_arrendamiento_variable)
+
+
+    # Inversiones
+    st.subheader("Inversiones")
     costo_inversiones_total = costo_capex + costo_renovacion
-    
+
     costo_capex_por_area = costo_por_area(costo_capex, area_productiva)
     costo_renovacion_por_area = costo_por_area(costo_renovacion, area_productiva)
     costo_inversiones_p_area = costo_capex_por_area+costo_renovacion_por_area
     costo_inversiones_qq = costo_inversiones_p_area/azucar_qq
 
-    st.write(f"Costo total (Ha): ${costo_inversiones_total:.2f}")
+    st.write(f"Costo total inversiones (Ha): ${costo_inversiones_total:.2f}")
 
+    # Costo total en patio
     costo_de_caña_en_patio = cat_ha + costo_total_agri + costo_arrendamiento_total + costo_inversiones_total
-
-    st.markdown(f"<h3 style='color: green;'>Costo total en patio: ${costo_de_caña_en_patio:,.2f}</h3>", unsafe_allow_html=True)
-    
     costo_de_caña_en_patio_qq = costo_inversiones_qq + costo_arrendamiento_tot_qq + costo_agri_qq_total + cat_qq
-    #st.write(costo_de_caña_en_patio_qq)
+
+    st.markdown(f"<h3 style='color: green;'>Costo total en patio (Ha): ${costo_de_caña_en_patio:,.2f}</h3>", unsafe_allow_html=True)
 
     st.subheader("Análisis de Ingresos")
 
@@ -466,6 +499,7 @@ if st.session_state.df is not None:
 
 
     costos_total = costo_de_caña_en_patio_qq + total_ponderado_fabrica + total_ponderado_transporte
+
     st.write(f"Margen (qq): ${total_ingresos - costos_total:.2f}")
     st.markdown(f"<h3 style='color: green;'>Margen: ${(total_ingresos-costos_total)*azucar_qq:,.2f}</h3>", unsafe_allow_html=True)
 
@@ -474,7 +508,6 @@ if st.session_state.df is not None:
     total_ponderado_qq = total_ponderado * azucar_qq
     total_contrib_qq = contribuciones * azucar_qq
     total_azu = df_ingresos['Totales'].sum()
-
 
     chart = alt.Chart(df_ingresos).mark_bar().encode(
         x='Tipo',
