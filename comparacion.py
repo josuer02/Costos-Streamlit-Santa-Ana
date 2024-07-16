@@ -304,7 +304,7 @@ if st.session_state.df is not None:
     if precio_ny_11_arrend > base_arrend: 
         costo_arrendamiento_variable = (precio_ny_11_arrend - base_arrend)*incremento_arrend
     else:
-        0
+        costo_arrendamiento_variable = 0
 
     #costo_arrendamiento_variable = st.sidebar.number_input("Costo de arrendamiento variable", min_value=0.0, value=0.0, step=0.01)
 
