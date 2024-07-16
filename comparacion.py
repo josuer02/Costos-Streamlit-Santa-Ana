@@ -21,6 +21,12 @@ def get_route(start_lat, start_lon, end_lat, end_lon):
 def costo_por_area(costo, area):
     return costo * area if area > 0 else 0
 
+# Usar los inputs existentes para los datos base
+precio_ny_11 = st.session_state.get('precio_ny_11', 15.00)
+white_premium = st.session_state.get('white_premium', 4.78)
+prima_vhp = st.session_state.get('prima_vhp', 1.66)
+precio_local = st.session_state.get('precio_local', 34.00)
+
 # Function to load data
 def load_data(file_path):
     return pd.read_excel(file_path, engine='openpyxl', sheet_name='COSTOS_QQ')
@@ -299,7 +305,7 @@ if st.session_state.df is not None:
 
     base_arrend = st.sidebar.number_input("Ingrese el precio base: ", min_value=0.0, value=0.0, step=0.01)
     incremento_arrend = st.sidebar.number_input("Ingrese el incremento negociado: ", min_value=0.0, value=0.0, step=0.01)
-    precio_ny_11_arrend = st.sidebar.number_input("Ingrese el precioNY11: ", min_value=0.0, value=19.00, step=0.01)
+    precio_ny_11_arrend = st.sidebar.number_input("Ingrese el precioNY11: ", min_value=0.0, value=precio_ny_11, step=0.01)
 
 
     #costo_arrendamiento_variable = st.sidebar.number_input("Costo de arrendamiento variable", min_value=0.0, value=0.0, step=0.01)
@@ -358,6 +364,7 @@ if st.session_state.df is not None:
     # Arrendamiento
     st.subheader("Arrendamiento")
     
+    costo_arrendamiento_variable = 0
     if precio_ny_11_arrend > base_arrend: 
         costo_arrendamiento_variable = (precio_ny_11_arrend - base_arrend)*incremento_arrend
     else:
@@ -396,11 +403,6 @@ if st.session_state.df is not None:
 
     st.subheader("Análisis de Ingresos")
 
-    # Usar los inputs existentes para los datos base
-    precio_ny_11 = st.session_state.get('precio_ny_11', 15.00)
-    white_premium = st.session_state.get('white_premium', 4.78)
-    prima_vhp = st.session_state.get('prima_vhp', 1.66)
-    precio_local = st.session_state.get('precio_local', 34.00)
 
     # Crear un DataFrame con los datos de ingresos
     df_ingresos = pd.DataFrame({
