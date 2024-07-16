@@ -301,10 +301,6 @@ if st.session_state.df is not None:
     incremento_arrend = st.sidebar.number_input("Ingrese el incremento negociado: ", min_value=0.0, value=0.0, step=0.01)
     precio_ny_11_arrend = st.sidebar.number_input("Ingrese el precioNY11: ", min_value=0.0, value=19.00, step=0.01)
 
-    if precio_ny_11_arrend > base_arrend: 
-        costo_arrendamiento_variable = (precio_ny_11_arrend - base_arrend)*incremento_arrend
-    else:
-        costo_arrendamiento_variable = 0
 
     #costo_arrendamiento_variable = st.sidebar.number_input("Costo de arrendamiento variable", min_value=0.0, value=0.0, step=0.01)
 
@@ -361,6 +357,12 @@ if st.session_state.df is not None:
 
     # Arrendamiento
     st.subheader("Arrendamiento")
+    
+    if precio_ny_11_arrend > base_arrend: 
+        costo_arrendamiento_variable = (precio_ny_11_arrend - base_arrend)*incremento_arrend
+    else:
+        costo_arrendamiento_variable = 0
+    
     costo_arrendamiento_total = costo_arrendamiento_fijo + costo_arrendamiento_variable
 
     costo_arrendamiento_por_area_fijo = costo_por_area(costo_arrendamiento_fijo, area_arrendada)
