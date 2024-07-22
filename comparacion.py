@@ -48,8 +48,8 @@ st.sidebar.header("Inputs")
 st.sidebar.subheader("Inputs Técnicos")
 area_arrendada = st.sidebar.number_input("Área Arrendada (Has):", value=400, step=100)
 area_productiva = st.sidebar.number_input("Área Productiva (Has):", value=360, step=100)
-rendimiento = st.sidebar.number_input("Rendimiento (Lbs/TC):", value=220.0, step=0.1, format="%.1f")
-productividad = st.sidebar.number_input("Productividad (TCH):", value=115)
+rendimiento = st.sidebar.number_input("Rendimiento (Kg/TMC):", value=99.790, step=0.1, format="%.1f")
+productividad = st.sidebar.number_input("Productividad (TMC/Ha):", value=104.33)
 tipo_de_cambio = st.sidebar.number_input("Tipo de Cambio:", value=7.85, step=0.01, format="%.2f")
 
 cat_option = st.sidebar.selectbox("CAT:", ["Con depreciación", "Sin depreciación"])
@@ -87,8 +87,8 @@ st.title("Análisis de Costos e Ingresos")
 
     # Cálculos iniciales
 caña_tc = area_productiva * productividad
-azucar_qq = caña_tc * rendimiento* (22.0462/21.739)/ 100
-azucar_tc = azucar_qq / 21.739
+azucar_qq = ((caña_tc * rendimiento)/1000)*22.0462
+azucar_tmaz = ((caña_tc * rendimiento)/1000)
 
 total_cat = cat_value * caña_tc
 cat_ha = total_cat / area_productiva
@@ -98,7 +98,7 @@ cat_qq = total_cat / azucar_qq
 st.subheader("Resultados Iniciales")
 st.write(f"Caña TC: {caña_tc:,.2f}")
 st.write(f"Azúcar QQ: {azucar_qq:,.2f}")
-st.write(f"Azúcar TC: {azucar_tc:,.2f}")
+st.write(f"Azúcar TMAz: {azucar_tmaz:,.2f}")
 
     # CAT
 st.subheader("CAT (Costo Agrícola Total)")
