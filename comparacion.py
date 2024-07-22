@@ -86,17 +86,17 @@ precio_tm_melaza= st.sidebar.number_input("Precio TM Melaza", min_value=0.0, val
 st.title("Análisis de Costos e Ingresos")
 
     # Cálculos iniciales
-caña_tc = area_productiva * productividad
-azucar_qq = ((caña_tc * rendimiento)/1000)*22.0462
-azucar_tmaz = ((caña_tc * rendimiento)/1000)
+caña_tm = area_productiva * productividad
+azucar_qq = ((caña_tm * rendimiento)/1000)*22.0462
+azucar_tmaz = ((caña_tm * rendimiento)/1000)
 
-total_cat = cat_value * caña_tc
+total_cat = cat_value * caña_tm
 cat_ha = total_cat / area_productiva
 cat_qq = total_cat / azucar_qq
 
     # Mostrar resultados iniciales
 st.subheader("Resultados Iniciales")
-st.write(f"Caña TC: {caña_tc:,.2f}")
+st.write(f"Caña TM: {caña_tm:,.2f}")
 st.write(f"Azúcar QQ: {azucar_qq:,.2f}")
 st.write(f"Azúcar TMAz: {azucar_tmaz:,.2f}")
 
@@ -256,8 +256,8 @@ total_fabrica = azucar_qq * df_costos_fabrica['Ponderado']
 df_ingresos['Ponderado'] = df_ingresos['Precio'] * df_ingresos['Porcentaje']
 total_ponderado = df_ingresos['Ponderado'].sum()
 
-contribucion_1 = (caña_tc*75)/1000
-contribucion_2 = (caña_tc*38)/1000
+contribucion_1 = (caña_tm*75)/1000
+contribucion_2 = (caña_tm*38)/1000
 
 c1 = (contribucion_1* precio_mwh)/azucar_qq
 c2 = (contribucion_2* precio_tm_melaza)/azucar_qq
